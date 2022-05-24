@@ -46,11 +46,12 @@ constraint CK_Tipo_Op check ((tipo_mant = 'OPERATIVO' and tiempo_mant is not nul
 )
 
 create table Productos(
-id_prod numeric(5) identity not null,--checkear largo exacto
+id_prod numeric(5) not null,--checkear largo exacto
 desc_prod varchar(100) not null unique,
 precio_usd_gramo decimal(10,2) not null,
 
-constraint PK_Producto primary key (id_prod)
+constraint PK_Producto primary key (id_prod),
+constraint CK_Id_Largo CHECK (LEN(cast(id_prod as varchar)) = 5)
 )
 
 create table ItemMantenimiento(
