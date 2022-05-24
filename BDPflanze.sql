@@ -39,7 +39,7 @@ costo_usd_mant decimal(10,2),
 
 
 constraint PK_Mant primary key (id_mantenimiento),
-constraint FK_Planta_Mant foreign key (id_planta) references Plantas(id_planta)
+constraint FK_Planta_Mant foreign key (id_planta) references Plantas(id_planta),
 constraint CK_Tipo_Mant check (tipo_mant = 'OPERATIVO' or tipo_mant = 'NUTRIENTES'),
 constraint CK_Tipo_Op check ((tipo_mant = 'OPERATIVO' and tiempo_mant is not null and costo_usd_mant is not null) or tipo_mant = 'NUTRIENTES'),
 
