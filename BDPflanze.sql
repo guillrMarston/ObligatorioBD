@@ -30,6 +30,7 @@ constraint FK_Id_Tag foreign key(id_planta) references Plantas(id_planta),
 
 create table MantenimientoPlantas(
 id_mantenimiento int identity not null,
+id_planta int not null,
 fecha_mant datetime not null,
 desc_mant varchar(100) not null,
 tipo_mant varchar(10) not null,
@@ -38,6 +39,7 @@ costo_usd_mant decimal(10,2),
 
 
 constraint PK_Mant primary key (id_mantenimiento),
+constraint FK_Planta_Mant foreign key (id_planta) references Plantas(id_planta)
 constraint CK_Tipo_Mant check (tipo_mant = 'OPERATIVO' or tipo_mant = 'NUTRIENTES'),
 constraint CK_Tipo_Op check ((tipo_mant = 'OPERATIVO' and tiempo_mant is not null and costo_usd_mant is not null) or tipo_mant = 'NUTRIENTES'),
 
@@ -52,11 +54,11 @@ constraint PK_Producto primary key (id_prod)
 )
 
 create table ItemMantenimiento(
-	id_planta numeric(5) not null,
+	id_prod numeric(5) not null,
 	id_mant int not null,
 	item_gramo int not null,
 
-	constraint PK_Mantenimiento primary key (id_planta, id_mant),
-	constraint FK_Producto foreign key (id_planta) references Productos(id_prod),
+	constraint PK_Mantenimiento primary key (id_prod, id_mant),
+	constraint FK_Producto foreign key (id_prod) references Productos(id_prod),
 	constraint FK_Mantenimeinto foreign key (id_mant) references MantenimientoPlantas(id_mantenimiento)
 )
