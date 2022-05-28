@@ -90,23 +90,107 @@ SELECT * FROM Plantas
 INSERT INTO Plantas (nombre_popular,fecnac,
             altura_cm,fec_hora_medida,precio_usd) 
 	 VALUES
-             ('Achilleas','20150523',
-             1500,'20160101',
+             ('Achilleas','2015-05-23',
+             1500,'2016-01-01',
              4.00),
              ('Agapanto Blanco',
-             '20140401',9600,
-             '20150409 10:34:09 AM',
+             '2014-04-01',9600,
+             '2015-04-09 10:34:09 AM',
              7.52),
              ('Agapanto Enano Blanco',
-             '20190129', NULL, NULL,
+             '2019-01-29', NULL, NULL,
              5.90),
 			 ('Alegría Nueva Guínea Blanca',
-			  '20201218',11500,'20210103 
+			  '2020-12-18',11500,'2021-01-03 
 			  12:39:05 AM',2.15),
-			  ('Papus Cachus','20220522',
+			  ('Papus Cachus','2022-05-22',
 			   NULL,NULL,25.25),
-			   ('Anturio schererianum','20220501',
-			    1245,'20220505 05:45:00 PM',20.50)
+			   ('Anturio schererianum','2022-05-01',
+			    1245,'2022-05-05 05:45:00 PM',20.50)
 
 
 /*FIN JUEGO DE PRUEBA*/
+
+
+/*
+JUEGO DE PRUEBAS EJ-2-E
+*/
+set dateformat dmy
+INSERT INTO Plantas (nombre_popular,fecnac) 
+	 VALUES('Achilleas','20/10/2015'),
+			('Agapanto Blanco','01/04/2014'),
+			('Agapanto Enano Blanco','29/01/2019')
+
+INSERT INTO Productos 
+	VALUES	(11111, 'Producto 1', 56),
+			(11112, 'Producto 2', 56),
+			(11113, 'Producto 3', 56),
+			(11114, 'Producto 4', 56)
+
+INSERT INTO MantenimientosNutriente(id_planta, fecha_mant, desc_mant) 
+	VALUES	(11, '20/10/2015', 'Mantenimiento 1 Achilleas'),
+			(11, '20/10/2016', 'Mantenimiento 2 Achilleas'),
+			(11, '20/10/2017', 'Mantenimiento 3 Achilleas'),
+			(11, '20/10/2018', 'Mantenimiento 4 Achilleas'),
+			(11, '20/10/2019', 'Mantenimiento 5 Achilleas'),
+			(13, '15/05/2016', 'Mantenimiento 1 Agapanto Enano Blanco'),
+			(13, '15/05/2017', 'Mantenimiento 2 Agapanto Enano Blanco')
+
+INSERT INTO MantenimientosNutriente(id_planta, fecha_mant, desc_mant) 
+VALUES
+		(12, '15/05/2016', 'Mantenimiento 1 Agapanto Blanco'),
+		(12, '15/05/2017', 'Mantenimiento 2 Agapanto Blanco'),
+		(12, '15/05/2018', 'Mantenimiento 3 Agapanto Blanco'),
+		(12, '15/05/2019', 'Mantenimiento 4 Agapanto Blanco'),
+		(12, '15/05/2020', 'Mantenimiento 5 Agapanto Blanco'),
+		(12, '15/05/2021', 'Mantenimiento 6 Agapanto Blanco')
+
+select * from MantenimientosNutriente
+
+INSERT INTO ItemMantenimiento 
+	VALUES	(11111, 1, 200),
+			(11112, 2, 500),
+			(11113, 3, 100),
+			(11114, 4, 90),
+			(11111, 5, 200),
+			(11112, 6, 150),
+			(11113, 7, 150)
+
+			INSERT INTO ItemMantenimiento 
+	VALUES	(11111, 8, 200),
+			(11112, 9, 500),
+			(11113, 10, 100),
+			(11111, 12, 200),
+			(11112, 13, 150),
+			(11113, 13, 200),
+			(11111, 13, 250)
+
+INSERT INTO ItemMantenimiento 
+	VALUES	(11114, 8, 100)
+
+			select * from MantenimientosNutriente
+			select * from Productos
+			select * from ItemMantenimiento
+
+/*
+id_prod numeric(5) not null,
+	id_mant int not null,
+	item_gramo int not null,
+*/
+
+/*
+ej-2-e
+*/
+select distinct p.* from Plantas p
+inner join MantenimientosNutriente mn on (mn.id_planta = p.id_planta)
+inner join ItemMantenimiento im on (im.id_mant = mn.id_mantenimiento)
+where p.id_planta in (select distinct t1.id_planta from (select p2.id_planta, im2.id_prod from Plantas p2
+														inner join MantenimientosNutriente mn2 on (mn2.id_planta = p2.id_planta)
+														inner join ItemMantenimiento im2 on (im2.id_mant = mn2.id_mantenimiento)
+														group by p2.id_planta, im2.id_prod) t1
+														group by t1.id_planta
+														having count(t1.id_planta) = (select count(*) from Productos))
+
+
+/* ej-2-f
+
