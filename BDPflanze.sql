@@ -110,3 +110,17 @@ INSERT INTO Plantas (nombre_popular,fecnac,
 
 
 /*FIN JUEGO DE PRUEBA*/
+
+
+/*ej3-b*/
+
+create function costoPromedioAnio(@anio datetime)
+returns table
+as
+return(
+select avg(mo.costo_usd_mant) as promedio
+from MantenimientosOperativo mo
+where year(mo.fecha_mant) = @anio 
+)
+
+select * from costoPromedioAnio(2017)
