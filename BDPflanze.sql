@@ -168,9 +168,7 @@ INSERT INTO ItemMantenimiento
 INSERT INTO ItemMantenimiento 
 	VALUES	(11114, 8, 100)
 
-			select * from MantenimientosNutriente
-			select * from Productos
-			select * from ItemMantenimiento
+			
 
 /*
 id_prod numeric(5) not null,
@@ -192,5 +190,50 @@ where p.id_planta in (select distinct t1.id_planta from (select p2.id_planta, im
 														having count(t1.id_planta) = (select count(*) from Productos))
 
 
-/* ej-2-f
+
+
+
+
+
+
+/*
+JUEGO DE PRUEBAS EJ-2-f
+*/
+
+insert into MantenimientosOperativo
+values (11, '10/02/2016', 'Descripcion mantenimiento operativo 1', 30, 50)
+
+insert into MantenimientosOperativo
+values (11, '10/02/2017', 'Descripcion mantenimiento operativo 2', 25, 30)
+		
+INSERT INTO Plantas (nombre_popular,fecnac, precio_usd) 
+	 VALUES('Achilleas','10/10/2019', 190)
+
+insert into MantenimientosOperativo
+values (16, '10/02/2018', 'Descripcion mantenimiento operativo 2', 25, 100),
+		(16, '10/02/2017', 'Descripcion mantenimiento operativo 1', 25, 150)
+
+
+select * from MantenimientosNutriente
+select * from MantenimientosOperativo
+select * from Productos
+select * from ItemMantenimiento
+select * from Plantas
+
+
+/* ej-2-f*/
+
+select * from plantas 
+where datediff(year, fecnac,getdate()) >= 2 and precio_usd < 200
+and id_planta in (select p.id_planta, sum(mo.costo_usd_mant) from Plantas p
+					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
+					group by p.id_planta
+					having sum(mo.costo_usd_mant) + (select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) as suma from Plantas p1
+													inner join MantenimientosNutriente mn on (p1.id_planta = mn.id_planta)
+													inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
+													inner join Productos prd on (im.id_prod = prd.id_prod)
+													/*where p1.id_planta = p.id_planta*/
+													group by p1.id_planta) t1) > 200)
+
+
 
