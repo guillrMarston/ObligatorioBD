@@ -1,9 +1,9 @@
 --drop database Pflanze
 --use master
 
-create database Pflanze
-use Pflanze
-GO
+--create database Pflanze
+--use Pflanze
+--GO
 
 
 
@@ -70,16 +70,16 @@ constraint FK_Planta_MantOpr foreign key (id_planta) references Plantas(id_plant
 
 
 create table Productos(
-id_prod numeric(5) not null,--checkear largo exacto
+id_prod varchar(5) not null,--checkear largo exacto
 desc_prod varchar(100) not null unique,
 precio_usd_gramo decimal(10,2) not null,
 
 constraint PK_Producto primary key (id_prod),
-constraint CK_Id_Largo CHECK (LEN(cast(id_prod as varchar)) = 5)
+constraint CK_Id_Largo CHECK (LEN(id_prod) = 5)
 )
 
 create table ItemMantenimiento(
-	id_prod numeric(5) not null,
+	id_prod varchar(5) not null,
 	id_mant int not null,
 	item_gramo int not null,
 
@@ -133,36 +133,36 @@ values
 (6, '20190101', 'Plantamos la primer schererianum', 10.00, 90.00)--8
 --(0, '0000/00/00', 'desc', 0.00, 0000.00),
 
-delete from productos
+--delete from productos
 INSERT INTO Productos values
-(10000, 'Fertilizante Natural', 0.50),--1
-(10002, 'Fertilizante Fertiloco', 0.00),--2
-(10003, 'Abono Bonito', 5.00),--3
-(10004, 'Pesticida MataTodo', 0.20),--4
-(10005, 'Pesticida CuidaPlantas', 1.50),--5
-(10006, 'Aceite Pesticida', 1.00),--6
-(10007, 'Compost Genial', 1.40),--7
-(10008, 'Humidificador PlantaFresquita', 2.00),--8
-(10009, 'Humidificador PlantaMojadita', 4.00)--9
+('FRT01', 'Fertilizante Natural', 0.50),--1
+('FRT02', 'Fertilizante Fertiloco', 0.00),--2
+('FRT03', 'Abono Bonito', 5.00),--3
+('PST01', 'Pesticida MataTodo', 0.20),--4
+('PST02', 'Pesticida CuidaPlantas', 1.50),--5
+('PST03', 'Aceite Pesticida', 1.00),--6
+('CMP01', 'Compost Genial', 1.40),--7
+('HMD01', 'Humidificador PlantaFresquita', 2.00),--8
+('HMD02', 'Humidificador PlantaMojadita', 4.00)--9
 
-
+--delete from ItemMantenimiento
 insert into ItemMantenimiento values
-(10001, 1, 30),
-(10002, 2, 22),
-(10004, 2, 64),
-(10007, 2, 100),
-(10009, 2, 23),
-(10001, 3, 20),
-(10007, 3, 10),
-(10008, 4, 100),
-(10007, 5, 23),
-(10001, 6, 200),
-(10005, 6, 10),
-(10006, 6, 5),
-(10008, 6, 200),
-(10002, 7, 50),
-(10004, 2, 27),
-(10009, 2, 98)
+('FRT01', 1, 30),
+('FRT02', 2, 22),
+('PST01', 2, 64),
+('CMP01', 2, 100),
+('HMD02', 2, 23),
+('FRT01', 3, 20),
+('CMP01', 3, 10),
+('HMD01', 4, 100),
+('CMP01', 5, 23),
+('FRT01', 6, 200),
+('PST02', 6, 10),
+('PST03', 6, 5),
+('HMD01', 6, 200),
+('FRT02', 7, 50),
+('PST01', 7, 27),
+('HMD02', 7, 98)
 
 
 --('', 0, 0),
@@ -178,24 +178,9 @@ insert into ItemMantenimiento values
 --)
 
 
-SELECT *
-FROM Plantas p join TagsPlanta tp on p.id_planta = tp.id_planta
-join Tags t on t.id_tag = tp.id_tag
-
-
 
 /*FIN JUEGO DE PRUEBA*/------------------------------------------------------------------------------------
 
-
-/*ej3-b*/
-
-create function costoPromedioAnio(@anio datetime)
-returns table
-as
-return(
-select avg(mo.costo_usd_mant) as promedio
-from MantenimientosOperativo mo
-where year(mo.fecha_mant) = @anio 
-)
-
-select * from costoPromedioAnio(2017)
+select * from Plantas
+select * from MantenimientosNutriente mn join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant join Productos p on im.id_prod = p.id_prod
+select * from MantenimientosOperativo mo 
