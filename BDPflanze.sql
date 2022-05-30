@@ -229,12 +229,12 @@ and id_planta in (select p.id_planta from Plantas p
 					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
 					group by p.id_planta
 					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) as suma from Plantas p1
-													inner join MantenimientosNutriente mn on (p1.id_planta = mn.id_planta)
-													inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
-													inner join Productos prd on (im.id_prod = prd.id_prod)
-													where p1.id_planta = p.id_planta
-													group by p1.id_planta) t1), 0) 
-													> 200)
+																							inner join MantenimientosNutriente mn on (p1.id_planta = mn.id_planta)
+																							inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
+																							inner join Productos prd on (im.id_prod = prd.id_prod)
+																							where p1.id_planta = p.id_planta
+																							group by p1.id_planta) t1), 0) 
+																							> 200)
 
 
 
