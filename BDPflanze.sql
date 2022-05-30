@@ -184,3 +184,19 @@ insert into ItemMantenimiento values
 select * from Plantas
 select * from MantenimientosNutriente mn join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant join Productos p on im.id_prod = p.id_prod
 select * from MantenimientosOperativo mo 
+
+--2
+--b. Mostrar la(s) plantas que recibieron más cantidad de mantenimientos
+
+--select * from plantas pla
+--where pla.id_planta = 
+		
+
+select p.nombre_popular, count(p.id_planta) as cantidadMantenimientos
+from Plantas p left join MantenimientosNutriente mn
+	on p.id_planta = mn.id_planta
+	left join MantenimientosOperativo mo
+	on p.id_planta = mo.id_planta
+group by p.id_planta, p.nombre_popular
+order by cantidadMantenimientos desc
+
