@@ -1,5 +1,5 @@
---drop database Pflanze
 --use master
+--drop database Pflanze
 
 --create database Pflanze
 --use Pflanze
@@ -89,7 +89,6 @@ create table ItemMantenimiento(
 )
 
 
-SELECT * FROM Plantas
 /*COMIENZO JUEGO DE PRUEBA*/------------------------------------------------------------------------------------
 INSERT INTO Plantas (nombre_popular,fecnac,
             altura_cm,fec_hora_medida,precio_usd) 
@@ -119,6 +118,7 @@ insert into MantenimientosNutriente values
 (6, '20200101', 'Tratamiento general')--7
 --(0, 0000/00/00, desc)
 --(id_planta,fecha_mant,desc_mant)
+select * from MantenimientosNutriente
 
 --delete from mantenimientosoperativo
 insert into MantenimientosOperativo
@@ -131,7 +131,14 @@ values
 (5, '20210201', 'Plantamos un Papus Cachus enorme', 2.30, 1000.00 ),--6
 (5, '20210909', 'Podamos el Papus Cachus', 2.30, 1000.00 ),--7
 (6, '20190101', 'Plantamos la primer schererianum', 10.00, 90.00)--8
+
+Insert into MantenimientosOperativo
+values
+(2, '20200119', 'podada', 1.00, 100.00)--9
+
 --(0, '0000/00/00', 'desc', 0.00, 0000.00),
+--(id_planta, fecha_mant, desc_mant, tiempo_mant, costo_usd_mant)
+
 
 --delete from productos
 INSERT INTO Productos values
@@ -182,5 +189,11 @@ insert into ItemMantenimiento values
 /*FIN JUEGO DE PRUEBA*/------------------------------------------------------------------------------------
 
 select * from Plantas
-select * from MantenimientosNutriente mn join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant join Productos p on im.id_prod = p.id_prod
-select * from MantenimientosOperativo mo 
+select * from MantenimientosNutriente mn left join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant join Productos p on im.id_prod = p.id_prod
+select * from MantenimientosOperativo mo join Plantas p on mo.id_planta = p.id_planta
+
+
+--b. Mostrar la(s) plantas que recibieron más cantidad de mantenimientosselect planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnac, 	count(planta.id_planta) as cantidadDeMantenimientosfrom Plantas planta left join MantenimientosNutriente mn 	on planta.id_planta = mn.id_planta left join MantenimientosOperativo mo	on planta.id_planta = mo.id_plantagroup by planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnachaving  count(planta.id_planta) in (		select  top 1 count(p.id_planta)		from Plantas p left join MantenimientosNutriente mn 			on p.id_planta = mn.id_planta left join MantenimientosOperativo mo			on p.id_planta = mo.id_planta		group by p.id_planta, p.nombre_popular		order by COUNT(p.id_planta) desc	)--select p.nombre_popular, count(p.id_planta) as cantidadMantenimientos--from Plantas p left join MantenimientosNutriente mn --	on p.id_planta = mn.id_planta left join MantenimientosOperativo mo--	on p.id_planta = mo.id_planta--group by p.id_planta, p.nombre_popular--order by COUNT(p.id_planta) desc--c.
+--Mostrar las plantas que este año ya llevan más de un 20% de costo de mantenimiento
+--que el costo de mantenimiento de todo el año anterior para la misma planta ( solo
+--considerar plantas nacidas en el año 2019 o antes)select *from plantas left join(	select Plantas.id_planta, iif(a.precioMantenimiento is null,0,a.precioMantenimiento)+iif(b.precioMantenimiento is null,0,b.precioMantenimiento) as precioMantenimientoTotal	from Plantas left join (			select mn.id_planta, sum(im.item_gramo*pr.precio_usd_gramo) as precioMantenimiento			from MantenimientosNutriente mn				join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant				join Productos pr on im.id_prod = pr.id_prod 			where YEAR(fecha_mant) = YEAR(GETDATE())			group by mn.id_planta			) a on Plantas.id_planta = a.id_planta			left join			(			select mo.id_planta, sum(mo.costo_usd_mant) as precioMantenimiento			from MantenimientosOperativo mo			where YEAR(fecha_mant) = YEAR(GETDATE())			group by mo.id_planta			) b on Plantas.id_planta = b.id_planta		) esteanio on Plantas.id_planta = esteanio.id_planta 		left join		(		select Plantas.id_planta, iif(a2.precioMantenimiento is null,0,a2.precioMantenimiento)+iif(b2.precioMantenimiento is null,0,b2.precioMantenimiento) as precioMantenimientoTotalPasado		from Plantas left join (		select mn.id_planta, sum(im.item_gramo*pr.precio_usd_gramo) as precioMantenimiento		from MantenimientosNutriente mn			join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant			join Productos pr on im.id_prod = pr.id_prod 		where YEAR(fecha_mant) = YEAR(GETDATE())-1		group by mn.id_planta		) a2 on Plantas.id_planta = a2.id_planta		left join		(		select mo.id_planta, sum(mo.costo_usd_mant) as precioMantenimiento		from MantenimientosOperativo mo		where YEAR(fecha_mant) = YEAR(GETDATE())-1		group by mo.id_planta		) b2 on Plantas.id_planta = b2.id_planta		)aniopasado on Plantas.id_planta = aniopasado.id_plantawhere esteanio.precioMantenimientoTotal > (aniopasado.precioMantenimientoTotalPasado)*0.20--end
