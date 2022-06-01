@@ -209,18 +209,8 @@ having  count(planta.id_planta) in (
 		order by COUNT(p.id_planta) desc
 	)
 
---select p.nombre_popular, count(p.id_planta) as cantidadMantenimientos
---from Plantas p left join MantenimientosNutriente mn 
---	on p.id_planta = mn.id_planta left join MantenimientosOperativo mo
---	on p.id_planta = mo.id_planta
---group by p.id_planta, p.nombre_popular
---order by COUNT(p.id_planta) desc
 
 --c.
---Mostrar las plantas que este año ya llevan más de un 20% de costo de mantenimiento
---que el costo de mantenimiento de todo el año anterior para la misma planta ( solo
---considerar plantas nacidas en el año 2019 o antes)
-
 select *
 from plantas left join(
 	select Plantas.id_planta, iif(a.precioMantenimiento is null,0,a.precioMantenimiento)+iif(b.precioMantenimiento is null,0,b.precioMantenimiento) as precioMantenimientoTotal
@@ -260,6 +250,28 @@ from plantas left join(
 		) b2 on Plantas.id_planta = b2.id_planta
 		)aniopasado on Plantas.id_planta = aniopasado.id_planta
 where esteanio.precioMantenimientoTotal > (aniopasado.precioMantenimientoTotalPasado)*0.20
+
+--E
+select distinct p.* from Plantas p
+inner join MantenimientosNutriente mn on (mn.id_planta = p.id_planta)
+inner join ItemMantenimiento im on (im.id_mant = mn.id_mantenimiento)
+where p.id_planta in (select distinct t1.id_planta from (select p2.id_planta, im2.id_prod from Plantas p2
+														inner join MantenimientosNutriente mn2 on (mn2.id_planta = p2.id_planta)
+														inner join ItemMantenimiento im2 on (im2.id_mant = mn2.id_mantenimiento)
+														group by p2.id_planta, im2.id_prod) t1
+														group by t1.id_planta
+														having count(t1.id_planta) = (select count(*) from Productos))
+
+--F
+select * from plantas 
+where datediff(year, fecnac,getdate()) >= 2 and precio_usd < 200
+and id_planta in (select p.id_planta from Plantas p
+					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
+					group by p.id_planta
+					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) as suma from Plantas p1
+
+
+
 
 --PROCEDIMIENTOS------------------------------------------------------------------------------------------------
 
