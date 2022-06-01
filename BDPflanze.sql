@@ -80,6 +80,7 @@ create table ItemMantenimiento(
 	id_prod numeric(5) not null,
 	id_mant int not null,
 	item_gramo int not null,
+	costo decimal(10,2) not null,
 
 	constraint PK_Mantenimiento primary key (id_prod, id_mant),
 	constraint FK_Producto foreign key (id_prod) references Productos(id_prod),
@@ -228,7 +229,7 @@ where datediff(year, fecnac,getdate()) >= 2 and precio_usd < 200
 and id_planta in (select p.id_planta from Plantas p
 					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
 					group by p.id_planta
-					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) as suma from Plantas p1
+					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo)+im.costo as suma from Plantas p1
 																							inner join MantenimientosNutriente mn on (p1.id_planta = mn.id_planta)
 																							inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
 																							inner join Productos prd on (im.id_prod = prd.id_prod)
