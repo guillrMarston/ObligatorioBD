@@ -105,7 +105,9 @@ values('FRUTAL'),('CONFLOR'),('SINFLOR'),('CONESPORAS'),('HIERBA'),('ARBUSTO'),(
 	('ALGA'),('CACTUS'),('MUSGO'),('ARBOL'),('TREPADORA'),('CONSEMILLAS')
 
 insert into TagPlanta values
-(1,1),(1,2),(1,6),(1,13),(2,3),(2,4),(2,10),(3,3),(3,4),(3,11),(4,2),(4,6),(4,7),(4,13),(5,12),(5,13),(6,10),(6,13) 
+(1,1),(1,2),(1,6),(1,13),(2,3),(2,4),(2,10),
+(3,3),(3,4),(3,11),(4,2),(4,6),(4,7),(4,13),
+(5,12),(5,13),(6,10),(6,13) 
 
 --delete from MantenimientosNutriente
 insert into MantenimientosNutriente values
@@ -172,20 +174,6 @@ insert into ItemMantenimiento values
 ('HMD02', 7, 98)
 
 
---('', 0, 0),
-
---create table ItemMantenimiento(
---	id_prod numeric(5) not null,
---	id_mant int not null,
---	item_gramo int not null,
-
---	constraint PK_Mantenimiento primary key (id_prod, id_mant),
---	constraint FK_Producto foreign key (id_prod) references Productos(id_prod),
---	constraint FK_Mantenimeinto foreign key (id_mant) references MantenimientoPlantas(id_mantenimiento)
---)
-
-
-
 /*FIN JUEGO DE PRUEBA*/------------------------------------------------------------------------------------
 
 select * from Plantas
@@ -193,6 +181,23 @@ select * from MantenimientosNutriente mn left join ItemMantenimiento im on mn.id
 select * from MantenimientosOperativo mo join Plantas p on mo.id_planta = p.id_planta
 
 --CONSULTAS-------------------------------------------------------------------------------------------------
+--a. Mostrar Nombre de Planta y Descripción del Mantenimiento para el último(s)
+---- mantenimiento hecho en el año actual
+
+    SELECT P.nombre_popular AS 'Nombre planta',
+	       MN.desc_mant AS 'Desc. Mantenimiento'
+      FROM Plantas AS P
+INNER JOIN MantenimientosNutriente AS MN
+        ON MN.id_planta = P.id_planta
+	 WHERE YEAR(MN.fecha_mant) = YEAR(GETDATE())
+	 UNION
+    SELECT P.nombre_popular AS 'Nombre planta',
+	       MO.desc_mant AS 'Desc. Mantenimiento'
+      FROM Plantas AS P
+INNER JOIN MantenimientosOperativo AS MO
+        ON MO.id_planta = P.id_planta
+     WHERE YEAR(MO.fecha_mant) = YEAR(GETDATE())
+
 --b. Mostrar la(s) plantas que recibieron más cantidad de mantenimientos
 select planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnac, 
 	count(planta.id_planta) as cantidadDeMantenimientos
@@ -207,7 +212,7 @@ having  count(planta.id_planta) in (
 			on p.id_planta = mo.id_planta
 		group by p.id_planta, p.nombre_popular
 		order by COUNT(p.id_planta) desc
-	)
+	);
 
 
 --c.
@@ -250,6 +255,11 @@ from plantas left join(
 		) b2 on Plantas.id_planta = b2.id_planta
 		)aniopasado on Plantas.id_planta = aniopasado.id_planta
 where esteanio.precioMantenimientoTotal > (aniopasado.precioMantenimientoTotalPasado)*0.20
+;
+
+--D. Mostrar las plantas que tienen el tag “FRUTAL”, a la vez tienen el tag “PERFUMA” y no
+--tienen el tag “TRONCOROTO”. Y que adicionalmente miden medio metro de altura o
+--más y tienen un precio de venta establecido
 
 --E
 select distinct p.* from Plantas p
@@ -260,7 +270,7 @@ where p.id_planta in (select distinct t1.id_planta from (select p2.id_planta, im
 														inner join ItemMantenimiento im2 on (im2.id_mant = mn2.id_mantenimiento)
 														group by p2.id_planta, im2.id_prod) t1
 														group by t1.id_planta
-														having count(t1.id_planta) = (select count(*) from Productos))
+														having count(t1.id_planta) = (select count(*) from Productos));
 
 --F
 select * from plantas 
@@ -268,14 +278,19 @@ where datediff(year, fecnac,getdate()) >= 2 and precio_usd < 200
 and id_planta in (select p.id_planta from Plantas p
 					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
 					group by p.id_planta
-					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) as suma from Plantas p1
+					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) as suma from Plantas p1 ;
 
 
+--A
 
 
 --PROCEDIMIENTOS------------------------------------------------------------------------------------------------
+--A
 
 
+
+
+GO
 --B
 create function costoPromedioAnio(@anio datetime)
 returns table
@@ -289,7 +304,7 @@ where year(mo.fecha_mant) = @anio
 select * from costoPromedioAnio(2017)
 
 
-
+GO
 
 --TRIGGERS----------------------------------------------------------------------------------------------------------
 --A
