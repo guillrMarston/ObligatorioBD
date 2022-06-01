@@ -96,9 +96,9 @@ INSERT INTO Plantas (nombre_popular,fecnac,
              ('Achilleas','20150523',1500,'20160101',4.00), --1
              ('Agapanto Blanco','20140401',9600,'20150409 10:34:09 AM',7.52), --2
              ('Agapanto Enano Blanco','20190129', NULL, NULL,5.90), --3
-			 ('Alegría Nueva Guínea Blanca','20201218',11500,'20210103 12:39:05 AM',2.15), --4
-			 ('Papus Cachus','20220522',NULL,NULL,25.25), --5
-			 ('Anturio schererianum','20220501',1245,'20220505 05:45:00 PM',20.50) --6
+			 ('Alegría Nueva Guínea Blanca','20171218',11500,'20210103 12:39:05 AM',2.15), --4
+			 ('Papus Cachus','20190522',NULL,NULL,25.25), --5
+			 ('Anturio schererianum','20180501',1245,'20220505 05:45:00 PM',20.50) --6
 
 insert into tags
 values('FRUTAL'),('CONFLOR'),('SINFLOR'),('CONESPORAS'),('HIERBA'),('ARBUSTO'),('CONIFERA'),
@@ -192,7 +192,7 @@ select * from Plantas
 select * from MantenimientosNutriente mn left join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant join Productos p on im.id_prod = p.id_prod
 select * from MantenimientosOperativo mo join Plantas p on mo.id_planta = p.id_planta
 
-
+--CONSULTAS-------------------------------------------------------------------------------------------------
 --b. Mostrar la(s) plantas que recibieron más cantidad de mantenimientos
 select planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnac, 
 	count(planta.id_planta) as cantidadDeMantenimientos
@@ -292,8 +292,7 @@ select * from costoPromedioAnio(2017)
 
 
 --TRIGGERS----------------------------------------------------------------------------------------------------------
---a
---drop table AuditoriaMaestroProductos
+--A
 create table AuditoriaMaestroProductos(
 	--TODO usuario-----------------------------------------
 	idAuditoria int identity,
@@ -307,7 +306,6 @@ create table AuditoriaMaestroProductos(
 	precioActual decimal(10,2) null
 )
 
---drop trigger auditoriaP
 create trigger AuditoriaP
 on Productos
 after insert, delete, update
@@ -359,6 +357,49 @@ delete from Productos where Productos.id_prod = 'PR002'
 
 select*from AuditoriaMaestroProductos
 select * from Productos
+
+--B 
+create trigger MantenimientoFechaO
+on MantenimientosOperativo
+instead of insert
+as begin
+	if (select i.fecha_mant from inserted i)>(select p.fecnac from Plantas p, inserted i where p.id_planta = i.id_planta)
+	begin 
+		insert into MantenimientosOperativo
+			select i.id_planta, i.fecha_mant, i.desc_mant, i.tiempo_mant, i.costo_usd_mant
+			from inserted i
+	end
+	else begin
+		print 'La fecha del mantenimiento es anterior a la fecha de nacimiento de la planta'
+	end
+end
+
+create trigger MantenimientoFechaN
+on MantenimientosNutriente
+instead of insert
+as begin
+	if (select i.fecha_mant from inserted i)>(select p.fecnac from Plantas p, inserted i where p.id_planta = i.id_planta)
+	begin 
+		insert into MantenimientosNutriente
+			select i.id_planta, i.fecha_mant, i.desc_mant
+			from inserted i
+	end
+	else begin
+		print 'La fecha del mantenimiento es anterior a la fecha de nacimiento de la planta'
+	end
+end
+
+--delete from MantenimientosNutriente where desc_mant = 'prueba'
+--insert into MantenimientosNutriente values
+--(1, '20220626', 'prueba')
+--select * from MantenimientosNutriente
+
+
+--delete from MantenimientosOperativo where desc_mant = 'prueba'
+--insert into MantenimientosOperativo
+--values
+--(1, '20100525', 'prueba', 6.66, 6666.00)
+--select * from MantenimientosOperativo
 
 
 
