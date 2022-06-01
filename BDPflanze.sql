@@ -193,27 +193,125 @@ select * from MantenimientosNutriente mn left join ItemMantenimiento im on mn.id
 select * from MantenimientosOperativo mo join Plantas p on mo.id_planta = p.id_planta
 
 
---b. Mostrar la(s) plantas que recibieron más cantidad de mantenimientosselect planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnac, 	count(planta.id_planta) as cantidadDeMantenimientosfrom Plantas planta left join MantenimientosNutriente mn 	on planta.id_planta = mn.id_planta left join MantenimientosOperativo mo	on planta.id_planta = mo.id_plantagroup by planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnachaving  count(planta.id_planta) in (		select  top 1 count(p.id_planta)		from Plantas p left join MantenimientosNutriente mn 			on p.id_planta = mn.id_planta left join MantenimientosOperativo mo			on p.id_planta = mo.id_planta		group by p.id_planta, p.nombre_popular		order by COUNT(p.id_planta) desc	)--select p.nombre_popular, count(p.id_planta) as cantidadMantenimientos--from Plantas p left join MantenimientosNutriente mn --	on p.id_planta = mn.id_planta left join MantenimientosOperativo mo--	on p.id_planta = mo.id_planta--group by p.id_planta, p.nombre_popular--order by COUNT(p.id_planta) desc--c.
+--b. Mostrar la(s) plantas que recibieron más cantidad de mantenimientos
+select planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnac, 
+	count(planta.id_planta) as cantidadDeMantenimientos
+from Plantas planta left join MantenimientosNutriente mn 
+	on planta.id_planta = mn.id_planta left join MantenimientosOperativo mo
+	on planta.id_planta = mo.id_planta
+group by planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnac
+having  count(planta.id_planta) in (
+		select  top 1 count(p.id_planta)
+		from Plantas p left join MantenimientosNutriente mn 
+			on p.id_planta = mn.id_planta left join MantenimientosOperativo mo
+			on p.id_planta = mo.id_planta
+		group by p.id_planta, p.nombre_popular
+		order by COUNT(p.id_planta) desc
+	)
+
+--select p.nombre_popular, count(p.id_planta) as cantidadMantenimientos
+--from Plantas p left join MantenimientosNutriente mn 
+--	on p.id_planta = mn.id_planta left join MantenimientosOperativo mo
+--	on p.id_planta = mo.id_planta
+--group by p.id_planta, p.nombre_popular
+--order by COUNT(p.id_planta) desc
+
+--c.
 --Mostrar las plantas que este año ya llevan más de un 20% de costo de mantenimiento
 --que el costo de mantenimiento de todo el año anterior para la misma planta ( solo
---considerar plantas nacidas en el año 2019 o antes)select *from plantas left join(	select Plantas.id_planta, iif(a.precioMantenimiento is null,0,a.precioMantenimiento)+iif(b.precioMantenimiento is null,0,b.precioMantenimiento) as precioMantenimientoTotal	from Plantas left join (			select mn.id_planta, sum(im.item_gramo*pr.precio_usd_gramo) as precioMantenimiento			from MantenimientosNutriente mn				join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant				join Productos pr on im.id_prod = pr.id_prod 			where YEAR(fecha_mant) = YEAR(GETDATE())			group by mn.id_planta			) a on Plantas.id_planta = a.id_planta			left join			(			select mo.id_planta, sum(mo.costo_usd_mant) as precioMantenimiento			from MantenimientosOperativo mo			where YEAR(fecha_mant) = YEAR(GETDATE())			group by mo.id_planta			) b on Plantas.id_planta = b.id_planta		) esteanio on Plantas.id_planta = esteanio.id_planta 		left join		(		select Plantas.id_planta, iif(a2.precioMantenimiento is null,0,a2.precioMantenimiento)+iif(b2.precioMantenimiento is null,0,b2.precioMantenimiento) as precioMantenimientoTotalPasado		from Plantas left join (		select mn.id_planta, sum(im.item_gramo*pr.precio_usd_gramo) as precioMantenimiento		from MantenimientosNutriente mn			join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant			join Productos pr on im.id_prod = pr.id_prod 		where YEAR(fecha_mant) = YEAR(GETDATE())-1		group by mn.id_planta		) a2 on Plantas.id_planta = a2.id_planta		left join		(		select mo.id_planta, sum(mo.costo_usd_mant) as precioMantenimiento		from MantenimientosOperativo mo		where YEAR(fecha_mant) = YEAR(GETDATE())-1		group by mo.id_planta		) b2 on Plantas.id_planta = b2.id_planta		)aniopasado on Plantas.id_planta = aniopasado.id_plantawhere esteanio.precioMantenimientoTotal > (aniopasado.precioMantenimientoTotalPasado)*0.20--4 AUDITORIAS
---a.
---Auditar cualquier cambio del maestro de Productos. Se debe llevar un registro detallado de
---las inserciones, modificaciones y borrados, en todos los casos registrar desde que PC se
---hacen los movimientos, la fecha y la hora, el usuario y todos los datos que permitan una
---correcta auditoría (si son modificaciones que datos se modificaron, qué datos había antes,
---que datos hay ahora, etc). La/s estructura/s necesaria para este punto es libre y queda a
---criterio del alumno--drop table AuditoriaMaestroProductoscreate table AuditoriaMaestroProductos(	--TODO usuario-----------------------------------------	idAuditoria int identity,	host varchar(128) not null,	fecha date not null,	operacion varchar(30) not null,	codigoProducto varchar(5) not null,	descAnterior varchar(100) null,
+--considerar plantas nacidas en el año 2019 o antes)
+
+select *
+from plantas left join(
+	select Plantas.id_planta, iif(a.precioMantenimiento is null,0,a.precioMantenimiento)+iif(b.precioMantenimiento is null,0,b.precioMantenimiento) as precioMantenimientoTotal
+	from Plantas left join (
+			select mn.id_planta, sum(im.item_gramo*pr.precio_usd_gramo) as precioMantenimiento
+			from MantenimientosNutriente mn
+				join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant
+				join Productos pr on im.id_prod = pr.id_prod 
+			where YEAR(fecha_mant) = YEAR(GETDATE())
+			group by mn.id_planta
+			) a on Plantas.id_planta = a.id_planta
+			left join
+			(
+			select mo.id_planta, sum(mo.costo_usd_mant) as precioMantenimiento
+			from MantenimientosOperativo mo
+			where YEAR(fecha_mant) = YEAR(GETDATE())
+			group by mo.id_planta
+			) b on Plantas.id_planta = b.id_planta
+		) esteanio on Plantas.id_planta = esteanio.id_planta 
+		left join
+		(
+		select Plantas.id_planta, iif(a2.precioMantenimiento is null,0,a2.precioMantenimiento)+iif(b2.precioMantenimiento is null,0,b2.precioMantenimiento) as precioMantenimientoTotalPasado
+		from Plantas left join (
+		select mn.id_planta, sum(im.item_gramo*pr.precio_usd_gramo) as precioMantenimiento
+		from MantenimientosNutriente mn
+			join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant
+			join Productos pr on im.id_prod = pr.id_prod 
+		where YEAR(fecha_mant) = YEAR(GETDATE())-1
+		group by mn.id_planta
+		) a2 on Plantas.id_planta = a2.id_planta
+		left join
+		(
+		select mo.id_planta, sum(mo.costo_usd_mant) as precioMantenimiento
+		from MantenimientosOperativo mo
+		where YEAR(fecha_mant) = YEAR(GETDATE())-1
+		group by mo.id_planta
+		) b2 on Plantas.id_planta = b2.id_planta
+		)aniopasado on Plantas.id_planta = aniopasado.id_planta
+where esteanio.precioMantenimientoTotal > (aniopasado.precioMantenimientoTotalPasado)*0.20
+
+--PROCEDIMIENTOS------------------------------------------------------------------------------------------------
+
+
+--B
+create function costoPromedioAnio(@anio datetime)
+returns table
+as
+return(
+select avg(mo.costo_usd_mant) as promedio
+from MantenimientosOperativo mo
+where year(mo.fecha_mant) = @anio 
+)
+
+select * from costoPromedioAnio(2017)
+
+
+
+
+--TRIGGERS----------------------------------------------------------------------------------------------------------
+--a
+--drop table AuditoriaMaestroProductos
+create table AuditoriaMaestroProductos(
+	--TODO usuario-----------------------------------------
+	idAuditoria int identity,
+	host varchar(128) not null,
+	fecha date not null,
+	operacion varchar(30) not null,
+	codigoProducto varchar(5) not null,
+	descAnterior varchar(100) null,
 	descActual varchar(100) null,
-	precioAnterior decimal(10,2) null,	precioActual decimal(10,2) null)--drop trigger auditoriaPcreate trigger AuditoriaPon Productosafter insert, delete, updateas begin	declare @operacion varchar(30);
-	declare @codigoProducto varchar(5);	declare @host varchar(128);
+	precioAnterior decimal(10,2) null,
+	precioActual decimal(10,2) null
+)
+
+--drop trigger auditoriaP
+create trigger AuditoriaP
+on Productos
+after insert, delete, update
+as begin
+	declare @operacion varchar(30);
+	declare @codigoProducto varchar(5);
+	declare @host varchar(128);
 	select @host = HOST_NAME();
 	declare @fechaYhora date;
 	select @fechaYhora = GETDATE();
 	declare @descAnterior varchar(100)
 	select @descAnterior = d.desc_prod from deleted d
 	declare @descActual varchar(100)
-	select @descActual= i.desc_prod from inserted i	declare @precioAnterior decimal(10,2)	select @precioAnterior= d.precio_usd_gramo from deleted d
+	select @descActual= i.desc_prod from inserted i
+	declare @precioAnterior decimal(10,2)
+	select @precioAnterior= d.precio_usd_gramo from deleted d
 	declare @precioActual decimal(10,2)
 	select @precioActual= i.precio_usd_gramo from inserted i
 	
@@ -241,4 +339,14 @@ select * from MantenimientosOperativo mo join Plantas p on mo.id_planta = p.id_p
 			insert into AuditoriaMaestroProductos 
 			values(@host, @fechaYhora, @operacion, @codigoProducto, @descAnterior, @descActual, @precioAnterior, @precioActual)
 		end
-	else print 'NO CAMBIÓ NADA'endinsert into Productos values ('PR002', 'Valor de prueba de autitoria 2', 6.66)delete from Productos where Productos.id_prod = 'PR002'select*from AuditoriaMaestroProductosselect * from Productos
+	else print 'NO CAMBIÓ NADA'
+end
+
+insert into Productos values ('PR002', 'Valor de prueba de autitoria 2', 6.66)
+delete from Productos where Productos.id_prod = 'PR002'
+
+select*from AuditoriaMaestroProductos
+select * from Productos
+
+
+
