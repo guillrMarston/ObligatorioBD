@@ -1,9 +1,9 @@
 --use master
---drop database Pflanze
+drop database Pflanze
 
---create database Pflanze
---use Pflanze
---GO
+create database Pflanze
+use Pflanze
+GO
 
 
 
@@ -82,6 +82,7 @@ create table ItemMantenimiento(
 	id_prod varchar(5) not null,
 	id_mant int not null,
 	item_gramo int not null,
+	mant_precio decimal(10,2),
 
 	constraint PK_Mantenimiento primary key (id_prod, id_mant),
 	constraint FK_Producto foreign key (id_prod) references Productos(id_prod),
@@ -98,14 +99,17 @@ INSERT INTO Plantas (nombre_popular,fecnac,
              ('Agapanto Enano Blanco','20190129', NULL, NULL,5.90), --3
 			 ('Alegría Nueva Guínea Blanca','20171218',11500,'20210103 12:39:05 AM',2.15), --4
 			 ('Papus Cachus','20190522',NULL,NULL,25.25), --5
-			 ('Anturio schererianum','20180501',1245,'20220505 05:45:00 PM',20.50) --6
+			 ('Anturio schererianum','20180501',1245,'20220505 05:45:00 PM',20.50), --6
+			 ('Cuscuta','20140602',null, null,205), --7
+			 ('Rosa de alabastro','20161108',1245,'20220111 14:23:00 PM',300), --8
+			 ('Planta del dinero','20180711',null,null,350) --9
 
 insert into tags
 values('FRUTAL'),('CONFLOR'),('SINFLOR'),('CONESPORAS'),('HIERBA'),('ARBUSTO'),('CONIFERA'),
 	('ALGA'),('CACTUS'),('MUSGO'),('ARBOL'),('TREPADORA'),('CONSEMILLAS')
 
 insert into TagPlanta values
-(1,1),(1,2),(1,6),(1,13),(2,3),(2,4),(2,10),(3,3),(3,4),(3,11),(4,2),(4,6),(4,7),(4,13),(5,12),(5,13),(6,10),(6,13) 
+(1,1),(1,2),(1,6),(1,13),(2,3),(2,4),(2,10),(3,3),(3,4),(3,11),(4,2),(4,6),(4,7),(4,13),(5,12),(5,13),(6,10),(6,13),(7,3),(7,5),(8,2),(9,3)
 
 --delete from MantenimientosNutriente
 insert into MantenimientosNutriente values
@@ -115,26 +119,35 @@ insert into MantenimientosNutriente values
 (4, '20221005', 'Humidificamos la alegria'),--4
 (5, '20210509', 'Compostada Papus'),--5
 (5, '20220323', 'Cuidados al Cachus'),--6
-(6, '20200101', 'Tratamiento general')--7
+(6, '20200101', 'Tratamiento general'),--7
+(7, '20200101', 'Fertilizacion'),--8
+(7, '20200101', 'Humidificacion'),--9
+(8, '20200101', 'Pesticidacion'),--10
+(9, '20200101', 'Fertilizacion')--11
 --(0, 0000/00/00, desc)
 --(id_planta,fecha_mant,desc_mant)
-select * from MantenimientosNutriente
 
 --delete from mantenimientosoperativo
 insert into MantenimientosOperativo
 values
-(1, '20220525', 'se podó la Achillea', 4.50, 5000.00), --1
+(1, '20220525', 'se podó la Achillea', 4.50, 50.00), --1
 (2, '20211220', 'plantamos el agapanto', 0.80, 2000.00), --2
 (2, '20211020', 'cosechamos el agapanto', 1.00, 10000.00),--3
 (2, '20220420', 'cosechamos el agapanto otra vez', 0.50, 10000.00),--4
 (3, '20200923', 'Podada', 0.90, 900.00 ),--5
-(5, '20210201', 'Plantamos un Papus Cachus enorme', 2.30, 1000.00 ),--6
-(5, '20210909', 'Podamos el Papus Cachus', 2.30, 1000.00 ),--7
+(5, '20210201', 'Plantamos un Papus Cachus enorme', 2.30, 10.00 ),--6
+(5, '20210909', 'Podamos el Papus Cachus', 2.30, 20.00 ),--7
 (6, '20190101', 'Plantamos la primer schererianum', 10.00, 90.00)--8
+
+
 
 Insert into MantenimientosOperativo
 values
-(2, '20200119', 'podada', 1.00, 100.00)--9
+(2, '20200119', 'podada', 1.00, 100.00),--9
+(7, '20190101', 'Riego', 5.00, 5.00),--10
+(8, '20190101', 'Cambio de maceta', 10.00, 20.00),--11
+(9, '20190101', 'Poda', 2.00, 30.00),--12
+(9, '20190101', 'Control de malezas', 10.00, 90.00)--13
 
 --(0, '0000/00/00', 'desc', 0.00, 0000.00),
 --(id_planta, fecha_mant, desc_mant, tiempo_mant, costo_usd_mant)
@@ -154,23 +167,34 @@ INSERT INTO Productos values
 
 --delete from ItemMantenimiento
 insert into ItemMantenimiento values
-('FRT01', 1, 30),
-('FRT02', 2, 22),
-('PST01', 2, 64),
-('CMP01', 2, 100),
-('HMD02', 2, 23),
-('FRT01', 3, 20),
-('CMP01', 3, 10),
-('HMD01', 4, 100),
-('CMP01', 5, 23),
-('FRT01', 6, 200),
-('PST02', 6, 10),
-('PST03', 6, 5),
-('HMD01', 6, 200),
-('FRT02', 7, 50),
-('PST01', 7, 27),
-('HMD02', 7, 98)
+('FRT01', 1, 30, 10),
 
+('FRT02', 2, 22, 20),
+('PST01', 2, 64, 10),
+('CMP01', 2, 100, 5),
+('FRT01', 2, 10, 30),
+('FRT03', 2, 200, 30),
+('PST02', 2, 30, 30),
+('PST03', 2, 15, 30),
+('HMD01', 2, 36, 30),
+('HMD02', 2, 50, 30),
+
+('FRT01', 3, 20, 25),
+('CMP01', 3, 10, 50),
+('HMD01', 4, 100, 10),
+('CMP01', 5, 23, 10),
+('FRT01', 6, 10, 5),
+('PST02', 6, 10, 3),
+('PST03', 6, 4, 10),
+('HMD01', 6, 2, 6),
+('FRT02', 7, 20, 30),
+('PST01', 7, 200, 50),
+('HMD02', 7, 21, 20),
+('FRT01', 8, 20, 10),
+('HMD01', 9, 30, 15),
+('PST02', 10, 50, 10),
+('HMD02', 11, 10, 10),
+('FRT01', 11, 100, 50)
 
 --('', 0, 0),
 
@@ -268,8 +292,14 @@ where datediff(year, fecnac,getdate()) >= 2 and precio_usd < 200
 and id_planta in (select p.id_planta from Plantas p
 					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
 					group by p.id_planta
-					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) as suma from Plantas p1
-
+					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) + sum(im.mant_precio) as suma from Plantas p1
+																							inner join MantenimientosNutriente mn on (p1.id_planta = mn.id_planta)
+																							inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
+																							inner join Productos prd on (im.id_prod = prd.id_prod)
+																							where p1.id_planta = p.id_planta
+																							group by p1.id_planta) t1)
+																							, 0) 
+																							> 200)
 
 
 
