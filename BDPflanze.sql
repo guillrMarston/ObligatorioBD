@@ -388,7 +388,7 @@ SET @aumentoOp = (SELECT SUM(costo_usd_mant)
                       WHERE id_planta = @idPlanta AND fecha_mant 
 					  BETWEEN @fechaDesde AND @fechaHasta) - @costoPrevioOp;
 
-    SELECT @costoPrevioNu = SUM(IM.costo_aplicacion)
+    SELECT @costoPrevioNu = SUM(IM.mant_precio)
       FROM ItemMantenimiento AS IM
 INNER JOIN MantenimientosNutriente AS MN
         ON IM.id_mant = MN.id_mantenimiento
@@ -399,7 +399,7 @@ INNER JOIN Plantas AS P
 	       @fechaHasta;
 
 UPDATE ItemMantenimiento
-   SET costo_aplicacion = costo_aplicacion * (1 + @porcentaje/100)
+   SET mant_precio = mant_precio * (1 + @porcentaje/100)
  WHERE id_mant IN (
        SELECT MN.id_mantenimiento
 	     FROM MantenimientosNutriente AS MN
@@ -408,7 +408,7 @@ UPDATE ItemMantenimiento
 	          @fechaHasta
  )
 
-SET @aumentoNu = (SELECT SUM(IM.costo_aplicacion)
+SET @aumentoNu = (SELECT SUM(IM.mant_precio)
                     FROM ItemMantenimiento AS IM
               INNER JOIN MantenimientosNutriente AS MN
                       ON IM.id_mant = MN.id_mantenimiento
@@ -427,7 +427,7 @@ SET @aumentoTotal = @aumentoNu + @aumentoOp;
 	  FROM MantenimientosOperativo as MO
 
      SELECT MN.id_mantenimiento, MN.id_planta,
-	        SUM(IM.costo_aplicacion) 
+	        SUM(IM.mant_precio) 
        FROM MantenimientosNutriente  as MN
  INNER JOIN ItemMantenimiento AS IM
          ON IM.id_mant = MN.id_mantenimiento
