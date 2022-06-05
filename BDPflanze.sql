@@ -82,6 +82,7 @@ create table ItemMantenimiento(
 	id_prod varchar(5) not null,
 	id_mant int not null,
 	item_gramo int not null,
+	costo_aplicacion NUMERIC(10,2)
 
 	constraint PK_Mantenimiento primary key (id_prod, id_mant),
 	constraint FK_Producto foreign key (id_prod) references Productos(id_prod),
@@ -102,12 +103,12 @@ INSERT INTO Plantas (nombre_popular,fecnac,
 
 insert into tags
 values('FRUTAL'),('CONFLOR'),('SINFLOR'),('CONESPORAS'),('HIERBA'),('ARBUSTO'),('CONIFERA'),
-	('ALGA'),('CACTUS'),('MUSGO'),('ARBOL'),('TREPADORA'),('CONSEMILLAS')
+	('ALGA'),('CACTUS'),('MUSGO'),('ARBOL'),('TREPADORA'),('CONSEMILLAS'),('PERFUMA'),('TRONCOROTO')
 
 insert into TagPlanta values
-(1,1),(1,2),(1,6),(1,13),(2,3),(2,4),(2,10),
+(1,1),(1,2),(1,6),(1,13),(1,14),(2,3),(2,4),(2,10),
 (3,3),(3,4),(3,11),(4,2),(4,6),(4,7),(4,13),
-(5,12),(5,13),(6,10),(6,13) 
+(5,12),(5,13),(6,10),(6,13),(6,1),(6,14),(6,15)
 
 --delete from MantenimientosNutriente
 insert into MantenimientosNutriente values
@@ -155,23 +156,27 @@ INSERT INTO Productos values
 ('HMD02', 'Humidificador PlantaMojadita', 4.00)--9
 
 --delete from ItemMantenimiento
+SELECT IM.* FROM MantenimientosNutriente AS MN INNER JOIN
+ItemMantenimiento AS IM ON IM.id_mant = MN.id_mantenimiento
+order by IM.id_mant asc
+
 insert into ItemMantenimiento values
-('FRT01', 1, 30),
-('FRT02', 2, 22),
-('PST01', 2, 64),
-('CMP01', 2, 100),
-('HMD02', 2, 23),
-('FRT01', 3, 20),
-('CMP01', 3, 10),
-('HMD01', 4, 100),
-('CMP01', 5, 23),
-('FRT01', 6, 200),
-('PST02', 6, 10),
-('PST03', 6, 5),
-('HMD01', 6, 200),
-('FRT02', 7, 50),
-('PST01', 7, 27),
-('HMD02', 7, 98)
+('FRT01', 1, 30,1500.25),
+('FRT02', 2, 22,2475.00),
+('PST01', 2, 64,50000.00),
+('CMP01', 2, 100,123.00),
+('HMD02', 2, 23,40.33),
+('FRT01', 3, 20,0.00),
+('CMP01', 3, 10,1432.88),
+('HMD01', 4, 100,299.99),
+('CMP01', 5, 23,240.77),
+('FRT01', 6, 200,199.99),
+('PST02', 6, 10,753.00),
+('PST03', 6, 5,744.55),
+('HMD01', 6, 200,8542.00),
+('FRT02', 7, 50,744.50),
+('PST01', 7, 27,200.50),
+('HMD02', 7, 98,342.55)
 
 
 /*FIN JUEGO DE PRUEBA*/------------------------------------------------------------------------------------
@@ -183,7 +188,6 @@ select * from MantenimientosOperativo mo join Plantas p on mo.id_planta = p.id_p
 --CONSULTAS-------------------------------------------------------------------------------------------------
 --a. Mostrar Nombre de Planta y Descripción del Mantenimiento para el último(s)
 ---- mantenimiento hecho en el año actual
-
     SELECT P.nombre_popular AS 'Nombre planta',
 	       MN.desc_mant AS 'Desc. Mantenimiento'
       FROM Plantas AS P
@@ -261,6 +265,25 @@ where esteanio.precioMantenimientoTotal > (aniopasado.precioMantenimientoTotalPa
 --tienen el tag “TRONCOROTO”. Y que adicionalmente miden medio metro de altura o
 --más y tienen un precio de venta establecido
 
+SELECT P.*
+  FROM Plantas AS P 
+ WHERE P.id_planta IN (SELECT TG.id_planta
+                         FROM TagPlanta AS TG
+				   INNER JOIN Tags AS T
+				           ON T.id_tag = TG.id_tag
+						WHERE T.nombre_tag = 'FRUTAL')
+	  AND P.id_planta IN (SELECT TG.id_planta
+                         FROM TagPlanta AS TG
+				   INNER JOIN Tags AS T
+				           ON T.id_tag = TG.id_tag
+						WHERE T.nombre_tag = 'PERFUMA')
+	AND P.id_planta NOT IN (SELECT TG.id_planta
+                         FROM TagPlanta AS TG
+				   INNER JOIN Tags AS T
+				           ON T.id_tag = TG.id_tag
+						WHERE T.nombre_tag = 'TRONCOROTO')
+	  
+
 --E
 select distinct p.* from Plantas p
 inner join MantenimientosNutriente mn on (mn.id_planta = p.id_planta)
@@ -280,17 +303,88 @@ and id_planta in (select p.id_planta from Plantas p
 					group by p.id_planta
 					having ISNULL(sum(mo.costo_usd_mant),0) + isnull((select t1.suma from (select p1.id_planta, sum(im.item_gramo * prd.precio_usd_gramo) as suma from Plantas p1 ;
 
-
+GO
 --A
 
 
 --PROCEDIMIENTOS------------------------------------------------------------------------------------------------
 --A
+--a. Implementar un procedimiento AumentarCostosPlanta que reciba por parámetro: un Id de
+--Planta, un porcentaje y un rango de fechas. El procedimiento debe aumentar en el
+--porcentaje dado, para esa planta, los costos de mantenimiento que se dieron en ese rango
+--de fechas. Esto tanto para mantenimientos de tipo “OPERATIVO” donde se aumenta el
+--costo por concepto de mano de obra (no se aumentan las horas, solo el costo) como de
+--tipo “NUTRIENTES” donde se debe aumentar los costos por concepto de uso de producto
+--(no se debe aumentar ni los gramos de producto usado ni actualizar nada del maestro de
+--productos)
+--El procedimiento debe retornar cuanto fue el aumento total de costo en dólares para la
+--planta en cuestión.
 
 
+CREATE PROCEDURE AumentarCostosPlanta @idPlanta INT, @porcentaje NUMERIC(5,2),
+                 @fechaDesde DATETIME,@fechaHasta DATETIME,@aumentoTotal NUMERIC(12,2) OUTPUT AS
+
+DECLARE @costoPrevioOp NUMERIC(10,2)
+DECLARE @aumentoOp NUMERIC(10,2)
+DECLARE @costoPrevioNu NUMERIC(10,2)
+DECLARE @aumentoNu NUMERIC(10,2)
 
 
-GO
+SELECT @costoPrevioOp = SUM(costo_usd_mant)
+  FROM MantenimientosOperativo
+ WHERE id_planta = @idPlanta AND 
+       fecha_mant BETWEEN @fechaDesde AND
+	   @fechaHasta;
+   
+UPDATE MantenimientosOperativo 
+   SET costo_usd_mant = costo_usd_mant*(1 + @porcentaje/100)
+ WHERE id_planta = @idPlanta AND
+       fecha_mant BETWEEN @fechaDesde AND
+	   @fechaHasta;
+
+SET @aumentoOp = (SELECT SUM(costo_usd_mant)
+                       FROM MantenimientosOperativo
+                      WHERE id_planta = @idPlanta AND fecha_mant 
+					  BETWEEN @fechaDesde AND @fechaHasta) - @costoPrevioOp;
+
+    SELECT @costoPrevioNu = SUM(IM.costo_aplicacion)
+      FROM ItemMantenimiento AS IM
+INNER JOIN MantenimientosNutriente AS MN
+        ON IM.id_mant = MN.id_mantenimiento
+INNER JOIN Plantas AS P
+        ON P.id_planta = MN.id_planta
+     WHERE P.id_planta = @idPlanta AND
+	       fecha_mant BETWEEN @fechaDesde AND
+	       @fechaHasta;
+
+UPDATE ItemMantenimiento
+   SET costo_aplicacion = costo_aplicacion * (1 + @porcentaje/100)
+ WHERE id_mant IN (
+       SELECT id_mant
+	     FROM MantenimientosNutriente AS MN
+		WHERE MN.id_planta = @idPlanta AND
+		      fecha_mant BETWEEN @fechaDesde AND
+	          @fechaHasta
+ )
+
+SET @aumentoNu = (SELECT SUM(IM.costo_aplicacion)
+                    FROM ItemMantenimiento AS IM
+              INNER JOIN MantenimientosNutriente AS MN
+                      ON IM.id_mant = MN.id_mantenimiento
+              INNER JOIN Plantas AS P
+                      ON P.id_planta = MN.id_planta
+                   WHERE P.id_planta = @idPlanta AND
+				         fecha_mant BETWEEN @fechaDesde AND
+	                     @fechaHasta) - @costoPrevioNu
+
+SET @aumentoTotal = @aumentoNu + @aumentoOp;
+ go
+
+ DECLARE @aumento NUMERIC(10,2)
+ EXEC AumentarCostosPlanta 1,25.00,'20220401','20220701',@aumento OUTPUT
+ PRINT @aumento
+
+
 --B
 create function costoPromedioAnio(@anio datetime)
 returns table
