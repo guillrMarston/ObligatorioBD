@@ -97,7 +97,7 @@ INSERT INTO Plantas (nombre_popular,fecnac,
              ('Achilleas','20150523',1500,'20160101',4.00), --1
              ('Agapanto Blanco','20140401',9600,'20150409 10:34:09 AM',7.52), --2
              ('Agapanto Enano Blanco','20190129', NULL, NULL,5.90), --3
-			 ('Alegría Nueva Guínea Blanca','20171218',11500,'20210103 12:39:05 AM',2.15), --4
+			 ('Alegrï¿½a Nueva Guï¿½nea Blanca','20171218',11500,'20210103 12:39:05 AM',2.15), --4
 			 ('Papus Cachus','20190522',NULL,NULL,25.25), --5
 			 ('Anturio schererianum','20180501',1245,'20220505 05:45:00 PM',20.50), --6
 			 ('Cuscuta','20140602',null, null,205), --7
@@ -106,14 +106,16 @@ INSERT INTO Plantas (nombre_popular,fecnac,
 
 insert into tags
 values('FRUTAL'),('CONFLOR'),('SINFLOR'),('CONESPORAS'),('HIERBA'),('ARBUSTO'),('CONIFERA'),
-	('ALGA'),('CACTUS'),('MUSGO'),('ARBOL'),('TREPADORA'),('CONSEMILLAS')
+	('ALGA'),('CACTUS'),('MUSGO'),('ARBOL'),('TREPADORA'),('CONSEMILLAS'),('PERFUMA'),('TRONCOROTO')
 
 insert into TagPlanta values
-(1,1),(1,2),(1,6),(1,13),(2,3),(2,4),(2,10),(3,3),(3,4),(3,11),(4,2),(4,6),(4,7),(4,13),(5,12),(5,13),(6,10),(6,13),(7,3),(7,5),(8,2),(9,3)
+(1,1),(1,2),(1,6),(1,13),(1,14),(2,3),(2,4),(2,10),
+(3,3),(3,4),(3,11),(4,2),(4,6),(4,7),(4,13),
+(5,12),(5,13),(6,10),(6,13),(6,1),(6,14),(6,15)
 
 --delete from MantenimientosNutriente
 insert into MantenimientosNutriente values
-(1, '20220626', 'se fertilizó la Achillea'),--1
+(1, '20220626', 'se fertilizï¿½ la Achillea'),--1
 (3, '20211210', 'mimamos al enano'),--2
 (4, '20220323', 'Fertilizamos la alegria'),--3
 (4, '20221005', 'Humidificamos la alegria'),--4
@@ -130,7 +132,7 @@ insert into MantenimientosNutriente values
 --delete from mantenimientosoperativo
 insert into MantenimientosOperativo
 values
-(1, '20220525', 'se podó la Achillea', 4.50, 50.00), --1
+(1, '20220525', 'se podï¿½ la Achillea', 4.50, 50.00), --1
 (2, '20211220', 'plantamos el agapanto', 0.80, 2000.00), --2
 (2, '20211020', 'cosechamos el agapanto', 1.00, 10000.00),--3
 (2, '20220420', 'cosechamos el agapanto otra vez', 0.50, 10000.00),--4
@@ -149,9 +151,7 @@ values
 (9, '20190101', 'Poda', 2.00, 30.00),--12
 (9, '20190101', 'Control de malezas', 10.00, 90.00)--13
 
---(0, '0000/00/00', 'desc', 0.00, 0000.00),
---(id_planta, fecha_mant, desc_mant, tiempo_mant, costo_usd_mant)
-
+--SELECT * FROM MantenimientosOperativo
 
 --delete from productos
 INSERT INTO Productos values
@@ -166,6 +166,10 @@ INSERT INTO Productos values
 ('HMD02', 'Humidificador PlantaMojadita', 4.00)--9
 
 --delete from ItemMantenimiento
+SELECT IM.* FROM MantenimientosNutriente AS MN INNER JOIN
+ItemMantenimiento AS IM ON IM.id_mant = MN.id_mantenimiento
+order by IM.id_mant asc
+
 insert into ItemMantenimiento values
 ('FRT01', 1, 30, 10),
 
@@ -217,7 +221,23 @@ select * from MantenimientosNutriente mn left join ItemMantenimiento im on mn.id
 select * from MantenimientosOperativo mo join Plantas p on mo.id_planta = p.id_planta
 
 --CONSULTAS-------------------------------------------------------------------------------------------------
---b. Mostrar la(s) plantas que recibieron más cantidad de mantenimientos
+--a. Mostrar Nombre de Planta y Descripciï¿½n del Mantenimiento para el ï¿½ltimo(s)
+---- mantenimiento hecho en el aï¿½o actual
+    SELECT P.nombre_popular AS 'Nombre planta',
+	       MN.desc_mant AS 'Desc. Mantenimiento'
+      FROM Plantas AS P
+INNER JOIN MantenimientosNutriente AS MN
+        ON MN.id_planta = P.id_planta
+	 WHERE YEAR(MN.fecha_mant) = YEAR(GETDATE())
+	 UNION
+    SELECT P.nombre_popular AS 'Nombre planta',
+	       MO.desc_mant AS 'Desc. Mantenimiento'
+      FROM Plantas AS P
+INNER JOIN MantenimientosOperativo AS MO
+        ON MO.id_planta = P.id_planta
+     WHERE YEAR(MO.fecha_mant) = YEAR(GETDATE())
+
+--b. Mostrar la(s) plantas que recibieron mï¿½s cantidad de mantenimientos
 select planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnac, 
 	count(planta.id_planta) as cantidadDeMantenimientos
 from Plantas planta left join MantenimientosNutriente mn 
@@ -231,7 +251,7 @@ having  count(planta.id_planta) in (
 			on p.id_planta = mo.id_planta
 		group by p.id_planta, p.nombre_popular
 		order by COUNT(p.id_planta) desc
-	)
+	);
 
 
 --c.
@@ -274,6 +294,30 @@ from plantas left join(
 		) b2 on Plantas.id_planta = b2.id_planta
 		)aniopasado on Plantas.id_planta = aniopasado.id_planta
 where esteanio.precioMantenimientoTotal > (aniopasado.precioMantenimientoTotalPasado)*0.20
+;
+
+--D. Mostrar las plantas que tienen el tag ï¿½FRUTALï¿½, a la vez tienen el tag ï¿½PERFUMAï¿½ y no
+--tienen el tag ï¿½TRONCOROTOï¿½. Y que adicionalmente miden medio metro de altura o
+--mï¿½s y tienen un precio de venta establecido
+
+SELECT P.*
+  FROM Plantas AS P 
+ WHERE P.id_planta IN (SELECT TG.id_planta
+                         FROM TagPlanta AS TG
+				   INNER JOIN Tags AS T
+				           ON T.id_tag = TG.id_tag
+						WHERE T.nombre_tag = 'FRUTAL')
+	  AND P.id_planta IN (SELECT TG.id_planta
+                         FROM TagPlanta AS TG
+				   INNER JOIN Tags AS T
+				           ON T.id_tag = TG.id_tag
+						WHERE T.nombre_tag = 'PERFUMA')
+	AND P.id_planta NOT IN (SELECT TG.id_planta
+                         FROM TagPlanta AS TG
+				   INNER JOIN Tags AS T
+				           ON T.id_tag = TG.id_tag
+						WHERE T.nombre_tag = 'TRONCOROTO')
+	  
 
 --E
 select distinct p.* from Plantas p
@@ -284,7 +328,7 @@ where p.id_planta in (select distinct t1.id_planta from (select p2.id_planta, im
 														inner join ItemMantenimiento im2 on (im2.id_mant = mn2.id_mantenimiento)
 														group by p2.id_planta, im2.id_prod) t1
 														group by t1.id_planta
-														having count(t1.id_planta) = (select count(*) from Productos))
+														having count(t1.id_planta) = (select count(*) from Productos));
 
 --F
 select * from plantas 
@@ -301,9 +345,98 @@ and id_planta in (select p.id_planta from Plantas p
 																							, 0) 
 																							> 200)
 
+GO
+--A
 
 
 --PROCEDIMIENTOS------------------------------------------------------------------------------------------------
+--A
+--a. Implementar un procedimiento AumentarCostosPlanta que reciba por parï¿½metro: un Id de
+--Planta, un porcentaje y un rango de fechas. El procedimiento debe aumentar en el
+--porcentaje dado, para esa planta, los costos de mantenimiento que se dieron en ese rango
+--de fechas. Esto tanto para mantenimientos de tipo ï¿½OPERATIVOï¿½ donde se aumenta el
+--costo por concepto de mano de obra (no se aumentan las horas, solo el costo) como de
+--tipo ï¿½NUTRIENTESï¿½ donde se debe aumentar los costos por concepto de uso de producto
+--(no se debe aumentar ni los gramos de producto usado ni actualizar nada del maestro de
+--productos)
+--El procedimiento debe retornar cuanto fue el aumento total de costo en dï¿½lares para la
+--planta en cuestiï¿½n.
+
+CREATE PROCEDURE AumentarCostosPlanta @idPlanta INT, @porcentaje NUMERIC(5,2),
+                 @fechaDesde DATETIME,@fechaHasta DATETIME,@aumentoTotal NUMERIC(12,2) OUTPUT AS
+
+DECLARE @costoPrevioOp NUMERIC(10,2)
+DECLARE @aumentoOp NUMERIC(10,2)
+DECLARE @costoPrevioNu NUMERIC(10,2)
+DECLARE @aumentoNu NUMERIC(10,2)
+
+
+SELECT @costoPrevioOp = SUM(costo_usd_mant)
+  FROM MantenimientosOperativo
+ WHERE id_planta = @idPlanta AND 
+       fecha_mant BETWEEN @fechaDesde AND
+	   @fechaHasta;
+   
+UPDATE MantenimientosOperativo 
+   SET costo_usd_mant = costo_usd_mant*(1 + @porcentaje/100)
+ WHERE id_planta = @idPlanta AND
+       fecha_mant BETWEEN @fechaDesde AND
+	   @fechaHasta;
+
+SET @aumentoOp = (SELECT SUM(costo_usd_mant)
+                       FROM MantenimientosOperativo
+                      WHERE id_planta = @idPlanta AND fecha_mant 
+					  BETWEEN @fechaDesde AND @fechaHasta) - @costoPrevioOp;
+
+    SELECT @costoPrevioNu = SUM(IM.mant_precio)
+      FROM ItemMantenimiento AS IM
+INNER JOIN MantenimientosNutriente AS MN
+        ON IM.id_mant = MN.id_mantenimiento
+INNER JOIN Plantas AS P
+        ON P.id_planta = MN.id_planta
+     WHERE P.id_planta = @idPlanta AND
+	       fecha_mant BETWEEN @fechaDesde AND
+	       @fechaHasta;
+
+UPDATE ItemMantenimiento
+   SET mant_precio = mant_precio * (1 + @porcentaje/100)
+ WHERE id_mant IN (
+       SELECT MN.id_mantenimiento
+	     FROM MantenimientosNutriente AS MN
+		WHERE MN.id_planta = @idPlanta AND
+		      fecha_mant BETWEEN @fechaDesde AND
+	          @fechaHasta
+ )
+
+SET @aumentoNu = (SELECT SUM(IM.mant_precio)
+                    FROM ItemMantenimiento AS IM
+              INNER JOIN MantenimientosNutriente AS MN
+                      ON IM.id_mant = MN.id_mantenimiento
+              INNER JOIN Plantas AS P
+                      ON P.id_planta = MN.id_planta
+                   WHERE P.id_planta = @idPlanta AND
+				         fecha_mant BETWEEN @fechaDesde AND
+	                     @fechaHasta) - @costoPrevioNu
+
+SET @aumentoTotal = @aumentoNu + @aumentoOp;
+ go
+
+
+
+    SELECT MO.id_planta,MO.costo_usd_mant
+	  FROM MantenimientosOperativo as MO
+
+     SELECT MN.id_mantenimiento, MN.id_planta,
+	        SUM(IM.mant_precio) 
+       FROM MantenimientosNutriente  as MN
+ INNER JOIN ItemMantenimiento AS IM
+         ON IM.id_mant = MN.id_mantenimiento
+   GROUP BY MN.id_mantenimiento,MN.id_planta 
+
+ DECLARE @aumento NUMERIC(10,2)
+ EXEC AumentarCostosPlanta 1,25.00,'20220401','20220701',@aumento OUTPUT
+ PRINT @aumento
+
 
 
 --B
@@ -319,7 +452,7 @@ where year(mo.fecha_mant) = @anio
 select * from costoPromedioAnio(2017)
 
 
-
+GO
 
 --TRIGGERS----------------------------------------------------------------------------------------------------------
 --A
@@ -379,7 +512,7 @@ as begin
 			insert into AuditoriaMaestroProductos 
 			values(@host, @fechaYhora, @operacion, @codigoProducto, @descAnterior, @descActual, @precioAnterior, @precioActual)
 		end
-	else print 'NO CAMBIÓ NADA'
+	else print 'NO CAMBIï¿½ NADA'
 end
 
 insert into Productos values ('PR002', 'Valor de prueba de autitoria 2', 6.66)
