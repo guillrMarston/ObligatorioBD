@@ -121,7 +121,7 @@ insert into MantenimientosNutriente values
 (6, '20200101', 'Tratamiento general')--7
 --(0, 0000/00/00, desc)
 --(id_planta,fecha_mant,desc_mant)
-select * from MantenimientosNutriente
+--select * from MantenimientosNutriente
 
 --delete from mantenimientosoperativo
 insert into MantenimientosOperativo
@@ -139,9 +139,7 @@ Insert into MantenimientosOperativo
 values
 (2, '20200119', 'podada', 1.00, 100.00)--9
 
---(0, '0000/00/00', 'desc', 0.00, 0000.00),
---(id_planta, fecha_mant, desc_mant, tiempo_mant, costo_usd_mant)
-
+--SELECT * FROM MantenimientosOperativo
 
 --delete from productos
 INSERT INTO Productos values
@@ -320,7 +318,6 @@ GO
 --El procedimiento debe retornar cuanto fue el aumento total de costo en dólares para la
 --planta en cuestión.
 
-
 CREATE PROCEDURE AumentarCostosPlanta @idPlanta INT, @porcentaje NUMERIC(5,2),
                  @fechaDesde DATETIME,@fechaHasta DATETIME,@aumentoTotal NUMERIC(12,2) OUTPUT AS
 
@@ -360,7 +357,7 @@ INNER JOIN Plantas AS P
 UPDATE ItemMantenimiento
    SET costo_aplicacion = costo_aplicacion * (1 + @porcentaje/100)
  WHERE id_mant IN (
-       SELECT id_mant
+       SELECT MN.id_mantenimiento
 	     FROM MantenimientosNutriente AS MN
 		WHERE MN.id_planta = @idPlanta AND
 		      fecha_mant BETWEEN @fechaDesde AND
@@ -380,9 +377,22 @@ SET @aumentoNu = (SELECT SUM(IM.costo_aplicacion)
 SET @aumentoTotal = @aumentoNu + @aumentoOp;
  go
 
+
+
+    SELECT MO.id_planta,MO.costo_usd_mant
+	  FROM MantenimientosOperativo as MO
+
+     SELECT MN.id_mantenimiento, MN.id_planta,
+	        SUM(IM.costo_aplicacion) 
+       FROM MantenimientosNutriente  as MN
+ INNER JOIN ItemMantenimiento AS IM
+         ON IM.id_mant = MN.id_mantenimiento
+   GROUP BY MN.id_mantenimiento,MN.id_planta 
+
  DECLARE @aumento NUMERIC(10,2)
  EXEC AumentarCostosPlanta 1,25.00,'20220401','20220701',@aumento OUTPUT
  PRINT @aumento
+
 
 
 --B
