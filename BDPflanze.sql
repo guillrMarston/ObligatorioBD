@@ -431,5 +431,82 @@ end
 --(1, '20100525', 'prueba', 6.66, 6666.00)
 --select * from MantenimientosOperativo
 
+----------------------------------------------------------------------------------------------------------
+
+--SELECT PARA VER LOS COSTO DE MANTENIMIENTO DE CADA ANIO
+--COSTO MANTENIMIENTOS 2021
+select p.*, ((isnull((select sum(im.item_gramo * prd.precio_usd_gramo) + sum(im.mant_precio) 
+			from Plantas p3
+			inner join MantenimientosNutriente mn on (p3.id_planta = mn.id_planta)
+			inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
+			inner join Productos prd on (im.id_prod = prd.id_prod)
+			where p3.id_planta = p.id_planta and year(mn.fecha_mant) = (year(getdate()) - 1)
+			group by p3.id_planta), 0)
++
+isnull((select sum(mo.costo_usd_mant) from Plantas p4
+					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
+					where p4.id_planta = p.id_planta and year(mo.fecha_mant) = (year(getdate()) - 1) 
+					group by p4.id_planta),0)) * 0.20) as suma
+																							
+from Plantas p
 
 
+--COSTO MANTENIMIENTOS 2022
+select p.*, ((isnull((select sum(im.item_gramo * prd.precio_usd_gramo) + sum(im.mant_precio) 
+			from Plantas p3
+			inner join MantenimientosNutriente mn on (p3.id_planta = mn.id_planta)
+			inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
+			inner join Productos prd on (im.id_prod = prd.id_prod)
+			where p3.id_planta = p.id_planta and year(mn.fecha_mant) = (year(getdate()))
+			group by p3.id_planta), 0)
++
+isnull((select sum(mo.costo_usd_mant) from Plantas p4
+					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
+					where p4.id_planta = p.id_planta and year(mo.fecha_mant) = (year(getdate())) 
+					group by p4.id_planta),0)) * 0.20) as suma
+																							
+from Plantas p
+
+
+
+
+
+
+
+
+--VERSION 2 CONSULTA C
+select p.*																						
+from Plantas p
+where (year(p.fecnac) <= 2019) and--<===== CHECKEO NACIMIENTO
+-- SUMA DE LOS MANTENIMIENTOS DE 2022
+(isnull((select sum(im.item_gramo * prd.precio_usd_gramo) + sum(im.mant_precio) 
+			from Plantas p1
+			inner join MantenimientosNutriente mn on (p1.id_planta = mn.id_planta)
+			inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
+			inner join Productos prd on (im.id_prod = prd.id_prod)
+			where p1.id_planta = p.id_planta and year(mn.fecha_mant) = year(getdate())
+			group by p1.id_planta), 0)
++
+isnull((select sum(mo.costo_usd_mant) from Plantas p2
+					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
+					where p2.id_planta = p.id_planta and year(mo.fecha_mant) = year(getdate())
+					group by p2.id_planta),0))
+
+>--<===== CONDICION
+-- SUMA DE LOS MANTENIMIENTOS DE 2021
+(isnull((select sum(im.item_gramo * prd.precio_usd_gramo) + sum(im.mant_precio) 
+			from Plantas p3
+			inner join MantenimientosNutriente mn on (p3.id_planta = mn.id_planta)
+			inner join ItemMantenimiento im on (mn.id_mantenimiento = im.id_mant)
+			inner join Productos prd on (im.id_prod = prd.id_prod)
+			where p3.id_planta = p.id_planta and year(mn.fecha_mant) = (year(getdate()) - 1)
+			group by p3.id_planta), 0)
++
+isnull((select sum(mo.costo_usd_mant) from Plantas p4
+					inner join MantenimientosOperativo mo on (p.id_planta = mo.id_planta)
+					where p4.id_planta = p.id_planta and year(mo.fecha_mant) = (year(getdate()) - 1) 
+					group by p4.id_planta),0))
+
+* 0.20-- <== 20%
+
+--isnull() https://www.w3schools.com/sql/func_sqlserver_isnull.asp
