@@ -1,6 +1,5 @@
 ﻿--CONSULTAS-------------------------------------------------------------------------------------------------
---a. Mostrar Nombre de Planta y Descripci�n del Mantenimiento para el �ltimo(s)
----- mantenimiento hecho en el a�o actual
+--a
     SELECT P.nombre_popular AS 'Nombre planta',
 	       MN.desc_mant AS 'Desc. Mantenimiento'
       FROM Plantas AS P
@@ -15,7 +14,7 @@ INNER JOIN MantenimientosOperativo AS MO
         ON MO.id_planta = P.id_planta
      WHERE YEAR(MO.fecha_mant) = YEAR(GETDATE())
 
---b. Mostrar la(s) plantas que recibieron m�s cantidad de mantenimientos
+--b
 select planta.id_planta, planta.nombre_popular, planta.altura_cm, planta.fec_hora_medida, planta.fecnac, 
 	count(planta.id_planta) as cantidadDeMantenimientos
 from Plantas planta left join MantenimientosNutriente mn 
@@ -33,52 +32,10 @@ having  count(planta.id_planta) in (
 
 
 --c.
-select *
-from plantas left join(
-	select Plantas.id_planta, iif(a.precioMantenimiento is null,0,a.precioMantenimiento)+iif(b.precioMantenimiento is null,0,b.precioMantenimiento) as precioMantenimientoTotal
-	from Plantas left join (
-			select mn.id_planta, sum(im.item_gramo*pr.precio_usd_gramo) as precioMantenimiento
-			from MantenimientosNutriente mn
-				join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant
-				join Productos pr on im.id_prod = pr.id_prod 
-			where YEAR(fecha_mant) = YEAR(GETDATE())
-			group by mn.id_planta
-			) a on Plantas.id_planta = a.id_planta
-			left join
-			(
-			select mo.id_planta, sum(mo.costo_usd_mant) as precioMantenimiento
-			from MantenimientosOperativo mo
-			where YEAR(fecha_mant) = YEAR(GETDATE())
-			group by mo.id_planta
-			) b on Plantas.id_planta = b.id_planta
-		) esteanio on Plantas.id_planta = esteanio.id_planta 
-		left join
-		(
-		select Plantas.id_planta, iif(a2.precioMantenimiento is null,0,a2.precioMantenimiento)+iif(b2.precioMantenimiento is null,0,b2.precioMantenimiento) as precioMantenimientoTotalPasado
-		from Plantas left join (
-		select mn.id_planta, sum(im.item_gramo*pr.precio_usd_gramo) as precioMantenimiento
-		from MantenimientosNutriente mn
-			join ItemMantenimiento im on mn.id_mantenimiento = im.id_mant
-			join Productos pr on im.id_prod = pr.id_prod 
-		where YEAR(fecha_mant) = YEAR(GETDATE())-1
-		group by mn.id_planta
-		) a2 on Plantas.id_planta = a2.id_planta
-		left join
-		(
-		select mo.id_planta, sum(mo.costo_usd_mant) as precioMantenimiento
-		from MantenimientosOperativo mo
-		where YEAR(fecha_mant) = YEAR(GETDATE())-1
-		group by mo.id_planta
-		) b2 on Plantas.id_planta = b2.id_planta
-		)aniopasado on Plantas.id_planta = aniopasado.id_planta
-where esteanio.precioMantenimientoTotal > (aniopasado.precioMantenimientoTotalPasado)*0.20
-;
-
-
 select p.*																					
 from Plantas p
-where (year(p.fecnac) <= 2019) and--<===== CHECKEO NACIMIENTO
--- SUMA DE LOS MANTENIMIENTOS DE 2022
+where (year(p.fecnac) <= 2019) and
+
 (isnull((select sum(im.item_gramo * prd.precio_usd_gramo) + sum(im.mant_precio) 
 			from Plantas p1
 			inner join MantenimientosNutriente mn on (p1.id_planta = mn.id_planta)
@@ -92,8 +49,7 @@ isnull((select sum(mo.costo_usd_mant) from Plantas p2
 					where p2.id_planta = p.id_planta and year(mo.fecha_mant) = year(getdate())
 					group by p2.id_planta),0))
 
->--<===== CONDICION
--- SUMA DE LOS MANTENIMIENTOS DE 2021
+>
 (isnull((select sum(im.item_gramo * prd.precio_usd_gramo) + sum(im.mant_precio) 
 			from Plantas p3
 			inner join MantenimientosNutriente mn on (p3.id_planta = mn.id_planta)
@@ -107,13 +63,11 @@ isnull((select sum(mo.costo_usd_mant) from Plantas p4
 					where p4.id_planta = p.id_planta and year(mo.fecha_mant) = (year(getdate()) - 1) 
 					group by p4.id_planta),0))
 
-* 0.20-- <== 20%
+* 0.20
 
---isnull() https://www.w3schools.com/sql/func_sqlserver_isnull.asp
 
---D. Mostrar las plantas que tienen el tag �FRUTAL�, a la vez tienen el tag �PERFUMA� y no
---tienen el tag �TRONCOROTO�. Y que adicionalmente miden medio metro de altura o
---m�s y tienen un precio de venta establecido
+
+--D
 
 SELECT P.*
   FROM Plantas AS P 

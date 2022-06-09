@@ -1,18 +1,6 @@
-﻿--A
-
-
---PROCEDIMIENTOS------------------------------------------------------------------------------------------------
+﻿--PROCEDIMIENTOS------------------------------------------------------------------------------------------------
 --A
---a. Implementar un procedimiento AumentarCostosPlanta que reciba por par�metro: un Id de
---Planta, un porcentaje y un rango de fechas. El procedimiento debe aumentar en el
---porcentaje dado, para esa planta, los costos de mantenimiento que se dieron en ese rango
---de fechas. Esto tanto para mantenimientos de tipo �OPERATIVO� donde se aumenta el
---costo por concepto de mano de obra (no se aumentan las horas, solo el costo) como de
---tipo �NUTRIENTES� donde se debe aumentar los costos por concepto de uso de producto
---(no se debe aumentar ni los gramos de producto usado ni actualizar nada del maestro de
---productos)
---El procedimiento debe retornar cuanto fue el aumento total de costo en d�lares para la
---planta en cuesti�n.
+
 
 CREATE PROCEDURE AumentarCostosPlanta @idPlanta INT, @porcentaje NUMERIC(5,2),
                  @fechaDesde DATETIME,@fechaHasta DATETIME,@aumentoTotal NUMERIC(12,2) OUTPUT AS
@@ -75,22 +63,6 @@ SET @aumentoTotal = @aumentoNu + @aumentoOp;
 
 
 
-    SELECT MO.id_planta,MO.costo_usd_mant
-	  FROM MantenimientosOperativo as MO
-
-     SELECT MN.id_mantenimiento, MN.id_planta,
-	        SUM(IM.mant_precio) 
-       FROM MantenimientosNutriente  as MN
- INNER JOIN ItemMantenimiento AS IM
-         ON IM.id_mant = MN.id_mantenimiento
-   GROUP BY MN.id_mantenimiento,MN.id_planta 
-
- DECLARE @aumento NUMERIC(10,2)
- EXEC AumentarCostosPlanta 1,25.00,'20220401','20220701',@aumento OUTPUT
- PRINT @aumento
-
-
-
 --B
 create function costoPromedioAnio(@anio datetime)
 returns table
@@ -101,7 +73,6 @@ from MantenimientosOperativo mo
 where year(mo.fecha_mant) = @anio 
 )
 
-select * from costoPromedioAnio(2017)
 
 
 GO

@@ -1,4 +1,22 @@
-﻿create trigger AuditoriaP
+﻿--TRIGGERS----------------------------------------------------------------------------------------------------------
+--A
+create table AuditoriaMaestroProductos(
+	--TODO usuario-----------------------------------------
+	idAuditoria int identity,
+	host varchar(128) not null,
+	fecha date not null,
+	operacion varchar(30) not null,
+	codigoProducto varchar(5) not null,
+	descAnterior varchar(100) null,
+	descActual varchar(100) null,
+	precioAnterior decimal(10,2) null,
+	precioActual decimal(10,2) null
+)
+
+
+
+
+create trigger AuditoriaP
 on Productos
 after insert, delete, update
 as begin
@@ -80,16 +98,3 @@ as begin
 		print 'La fecha del mantenimiento es anterior a la fecha de nacimiento de la planta'
 	end
 end
-
---delete from MantenimientosNutriente where desc_mant = 'prueba'
---insert into MantenimientosNutriente values
---(1, '20220626', 'prueba')
---select * from MantenimientosNutriente
-
-
---delete from MantenimientosOperativo where desc_mant = 'prueba'
---insert into MantenimientosOperativo
---values
---(1, '20100525', 'prueba', 6.66, 6666.00)
---select * from MantenimientosOperativo
-

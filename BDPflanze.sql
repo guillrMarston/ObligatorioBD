@@ -70,7 +70,7 @@ constraint FK_Planta_MantOpr foreign key (id_planta) references Plantas(id_plant
 
 
 create table Productos(
-id_prod varchar(5) not null,--checkear largo exacto
+id_prod varchar(5) not null,
 desc_prod varchar(100) not null unique,
 precio_usd_gramo decimal(10,2) not null,
 
@@ -107,13 +107,12 @@ INSERT INTO Plantas (nombre_popular,fecnac,
 insert into tags
 values('FRUTAL'),('CONFLOR'),('SINFLOR'),('CONESPORAS'),('HIERBA'),('ARBUSTO'),('CONIFERA'),
 	('ALGA'),('CACTUS'),('MUSGO'),('ARBOL'),('TREPADORA'),('CONSEMILLAS'),('PERFUMA'),('TRONCOROTO')
-
 insert into TagPlanta values
 (1,1),(1,2),(1,6),(1,13),(1,14),(2,3),(2,4),(2,10),
 (3,3),(3,4),(3,11),(4,2),(4,6),(4,7),(4,13),
 (5,12),(5,13),(6,10),(6,13),(6,1),(6,14),(6,15)
 
---delete from MantenimientosNutriente
+
 insert into MantenimientosNutriente values
 (1, '20220626', 'se fertiliz� la Achillea'),--1
 (3, '20211210', 'mimamos al enano'),--2
@@ -126,10 +125,7 @@ insert into MantenimientosNutriente values
 (7, '20200101', 'Humidificacion'),--9
 (8, '20200101', 'Pesticidacion'),--10
 (9, '20200101', 'Fertilizacion')--11
---(0, 0000/00/00, desc)
---(id_planta,fecha_mant,desc_mant)
 
---delete from mantenimientosoperativo
 insert into MantenimientosOperativo
 values
 (1, '20220525', 'se pod� la Achillea', 4.50, 50.00), --1
@@ -151,9 +147,7 @@ values
 (9, '20190101', 'Poda', 2.00, 30.00),--12
 (9, '20190101', 'Control de malezas', 10.00, 90.00)--13
 
---SELECT * FROM MantenimientosOperativo
 
---delete from productos
 INSERT INTO Productos values
 ('FRT01', 'Fertilizante Natural', 0.50),--1
 ('FRT02', 'Fertilizante Fertiloco', 0.00),--2
@@ -165,7 +159,7 @@ INSERT INTO Productos values
 ('HMD01', 'Humidificador PlantaFresquita', 2.00),--8
 ('HMD02', 'Humidificador PlantaMojadita', 4.00)--9
 
---delete from ItemMantenimiento
+
 SELECT IM.* FROM MantenimientosNutriente AS MN INNER JOIN
 ItemMantenimiento AS IM ON IM.id_mant = MN.id_mantenimiento
 order by IM.id_mant asc
@@ -200,19 +194,6 @@ insert into ItemMantenimiento values
 ('HMD02', 11, 10, 10),
 ('FRT01', 11, 100, 50)
 
---('', 0, 0),
-
---create table ItemMantenimiento(
---	id_prod numeric(5) not null,
---	id_mant int not null,
---	item_gramo int not null,
-
---	constraint PK_Mantenimiento primary key (id_prod, id_mant),
---	constraint FK_Producto foreign key (id_prod) references Productos(id_prod),
---	constraint FK_Mantenimeinto foreign key (id_mant) references MantenimientoPlantas(id_mantenimiento)
---)
-
-
 
 /*FIN JUEGO DE PRUEBA*/------------------------------------------------------------------------------------
 
@@ -223,20 +204,6 @@ select * from MantenimientosOperativo mo join Plantas p on mo.id_planta = p.id_p
 
 
 
---TRIGGERS----------------------------------------------------------------------------------------------------------
---A
-create table AuditoriaMaestroProductos(
-	--TODO usuario-----------------------------------------
-	idAuditoria int identity,
-	host varchar(128) not null,
-	fecha date not null,
-	operacion varchar(30) not null,
-	codigoProducto varchar(5) not null,
-	descAnterior varchar(100) null,
-	descActual varchar(100) null,
-	precioAnterior decimal(10,2) null,
-	precioActual decimal(10,2) null
-)
 
 
 
