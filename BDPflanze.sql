@@ -89,6 +89,12 @@ create table ItemMantenimiento(
 	constraint FK_Mantenimeinto foreign key (id_mant) references MantenimientosNutriente(id_mantenimiento)
 )
 
+CREATE INDEX I1 ON MantenimientosOperativo(id_planta);
+CREATE INDEX I2 ON MantenimientosNutriente(id_planta);
+CREATE INDEX I3 ON ItemMantenimiento(id_prod);
+CREATE INDEX I4 ON ItemMantenimiento(id_mant);
+CREATE INDEX I5 ON TagPlanta(id_planta)
+CREATE INDEX I6 ON TagPlanta(id_tag)
 
 /*COMIENZO JUEGO DE PRUEBA*/------------------------------------------------------------------------------------
 INSERT INTO Plantas (nombre_popular,fecnac,
